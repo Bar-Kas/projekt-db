@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rezerwacja Miejsc</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .stage { 
+            width: 100%; background: #333; color: #aaa; letter-spacing: 5px;
+            text-align: center; padding: 10px; margin-bottom: 30px; 
+            border-radius: 0 0 50px 50px; /* Zaokrąglenie sceny */
+            box-shadow: 0 10px 20px -10px #000;
+        }
+        
+        .seat-map { 
+            display: grid; gap: 6px; justify-content: center; margin: 0 auto; 
+        }
+
+        .seat { 
+            width: 35px; height: 35px; 
+            background: #2e7d32; /* Ciemniejszy zielony */
+            color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border-radius: 4px; font-size: 11px;
+            box-sizing: border-box; border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .seat.booked { 
+            background: #c62828; /* Czerwony */
+            opacity: 0.5; pointer-events: none; 
+        }
+
+        .seat.selected { 
+            background: #1565c0; /* Niebieski */
+            border: 2px solid #64b5f6; transform: scale(1.1); 
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+        
+        .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.9em; }
+        .dot { width: 15px; height: 15px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/spectacle/<%= seance.spectacle_id %>">&larr; Anuluj i wróć</a>
+        
+        <div class="card" style="margin-top: 20px; text-align: center;">
+            <h2><%= seance.title %></h2>
+            <p>
+                <%= moment(seance.start_time).format('YYYY-MM-DD HH:mm') %> | 
+                <%= seance.hall_name %>
+            </p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background:#2e7d32"></div> Wolne</div>
+            <div class="legend-item"><div class="dot" style="background:#1565c0"></div> Wybrane</div>
+            <div class="legend-item"><div class="dot" style="background:#c62828; opacity:0.5"></div> Zajęte</div>
+        </div>
+        
+        <div class="stage">EKRAN / SCENA</div>
+        
+        <form action="/book" method="POST" id="bookingForm">
+            <input type="hidden" name="seanceId" value="<%= seance.id %>">
+            
+            <div class="seat-map" style="grid-template-columns: repeat(20, 40px);">
+                <% seats.forEach(seat => { %>
+                    <div 
+                        class="seat <%= bookedIds.includes(seat.id) ? 'booked' : '' %>"
+                        style="grid-column: <%= seat.grid_x %>; grid-row: <%= seat.grid_y %>;"
+                        data-id="<%= seat.id %>"
+                        onclick="toggleSeat(this)">
+                        <%= seat.row_label %><%= seat.number %>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div id="inputs-container"></div>
+            
+            <div class="card" style="margin-top: 30px; text-align: center; position: sticky; bottom: 0; border-top: 2px solid #4CAF50;">
+                <p>Wybrano miejsc: <strong id="count" style="color:#4CAF50; font-size:1.2em">0</strong></p>
+                <button type="submit" id="submitBtn" disabled>Rezerwuj i Zapłać</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleSeat(element) {
+            if (element.classList.contains('booked')) return;
+            element.classList.toggle('selected');
+            updateForm();
+        }
+
+        function updateForm() {
+            const container = document.getElementById('inputs-container');
+            const submitBtn = document.getElementById('submitBtn');
+            const countSpan = document.getElementById('count');
+            
+            container.innerHTML = ''; 
+            const selectedSeats = document.querySelectorAll('.seat.selected');
+            
+            countSpan.innerText = selectedSeats.length;
+            submitBtn.disabled = selectedSeats.length === 0;
+
+            selectedSeats.forEach(s => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selectedSeats';
+                input.value = s.dataset.id;
+                container.appendChild(input);
+            });
+        }
+    </script>
+</body>
+</html>

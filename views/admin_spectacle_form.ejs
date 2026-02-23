@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Formularz</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <h1>Formularz</h1>
+        
+        <div class="card">
+            <form action="/admin/spectacle" method="POST" enctype="multipart/form-data">
+                
+                <label>Tytuł:</label>
+                <input type="text" name="title" required placeholder="Wpisz tytuł sztuki...">
+
+                <label>Gatunek:</label>
+                <select name="genre_id" required>
+                    <% genres.forEach(g => { %>
+                        <option value="<%= g.id %>"><%= g.name %></option>
+                    <% }) %>
+                </select>
+                
+                <label>Opis:</label>
+                <textarea name="description" required rows="5" placeholder="Krótki opis fabuły..."></textarea>
+                
+                <label>Czas trwania (min):</label>
+                <input type="number" name="duration" required>
+                
+                <label>Plakat (Obrazek):</label>
+                <input type="file" name="poster" accept="image/*" required style="border:none; padding-left:0;">
+                
+                <div style="margin-top:20px; display:flex; justify-content:space-between;">
+                    <a href="/admin" class="btn" style="background:#555">Anuluj</a>
+                    <button type="submit">Zapisz Spektakl</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

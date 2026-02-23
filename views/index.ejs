@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Repertuar Teatru</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Repertuar Teatru</h1>
+            <% if(user && user.role === 'admin') { %>
+                <a href="/admin" class="btn">Panel Administratora</a>
+            <% } %>
+        </div>
+
+<div class="card">
+            <strong>Filtruj wg kategorii:</strong>
+            
+            <a href="/" style="margin-left: 10px; <%= !selectedGenre ? 'color:#fff; text-decoration:underline' : '' %>">
+                Wszystkie
+            </a>
+
+            <% genres.forEach(g => { %>
+                <a href="/?genre=<%= g.id %>" style="margin-left: 10px; <%= selectedGenre == g.id ? 'color:#fff; text-decoration:underline' : '' %>">
+                    <%= g.name %>
+                </a>
+            <% }) %>
+        </div>
+
+        <div class="grid">
+            <% if (spectacles.length === 0) { %>
+                <p>Brak spektakli w tej kategorii.</p>
+            <% } %>
+
+            <% spectacles.forEach(spec => { %>
+                <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <img src="<%= spec.poster_url %>" 
+                            alt="Plakat" 
+                            class="poster-img" 
+                            onerror="this.onerror=null;this.src='/images/default-poster.png';">
+                        <h3><%= spec.title %></h3>
+                        <p><span class="tag"><%= spec.genre_name || 'Inne' %></span></p>
+                    </div>
+                    <a href="/spectacle/<%= spec.id %>">
+                        <button style="width:100%">Zobacz Szczegóły</button>
+                    </a>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+</body>
+</html>

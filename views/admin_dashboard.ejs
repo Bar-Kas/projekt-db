@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel Admina</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h1>Panel Zarządzania</h1>
+            <a href="/" class="btn" style="background:#555">Wyloguj / Wyjdź</a>
+        </div>
+        
+        <nav style="margin-bottom: 30px;">
+            <a href="/admin/spectacle/new">➕ Dodaj Spektakl</a>
+            <a href="/admin/seance/new">➕ Dodaj Seans</a>
+            <a href="/admin/actors">👥 Aktorzy i Płace</a>
+            <a href="/admin/stats" class="btn" style="background-color: #8e44ad;">📊 Zaawansowana Analityka SQL</a>
+<a href="/admin/reports" class="btn" style="background-color: #d35400;">🖨️ Generator Raportów PDF</a>
+  </nav>
+
+  <div style="background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 15px;">
+            <strong style="color: #e0e0e0; margin-right: 10px;">⚙️ Procedury Cenowe:</strong>
+            
+            <form action="/admin/update-prices" method="POST" style="margin:0; display:inline;">
+                <input type="hidden" name="percentage" value="-10"> <button type="submit" class="btn" style="background-color: #27ae60; padding: 8px 15px; font-size: 0.9em;" onclick="return confirm('Czy na pewno chcesz OBNIŻYĆ ceny wszystkich przyszłych seansów o 10%?')">
+                    📉 Promocja -10%
+                </button>
+            </form>
+
+            <form action="/admin/update-prices" method="POST" style="margin:0; display:inline;">
+                <input type="hidden" name="percentage" value="10"> <button type="submit" class="btn" style="background-color: #c0392b; padding: 8px 15px; font-size: 0.9em;" onclick="return confirm('Czy na pewno chcesz PODNIEŚĆ ceny wszystkich przyszłych seansów o 10%?')">
+                    📈 Podwyżka +10%
+                </button>
+            </form>
+
+            <span style="color: #777; font-size: 0.85em; margin-left: auto;">*Zmiany dotyczą tylko przyszłych seansów.</span>
+        </div>
+
+        <div class="card">
+            
+            <div class="tabs-nav">
+                <button class="tab-btn active" onclick="openTab(event, 'stats')">📊 Raport Sprzedaży</button>
+                <button class="tab-btn" onclick="openTab(event, 'spectacles')">🎭 Lista Spektakli</button>
+                <button class="tab-btn" onclick="openTab(event, 'seances')">📅 Nadchodzące Seanse</button>
+            </div>
+
+<div id="stats" class="tab-content active">
+                
+                <div class="header-wrap">
+                    <div>
+                        <h3 style="margin:0;">Podgląd Finansowy</h3>
+                        <small style="color:#aaa">Analiza sprzedaży w czasie</small>
+                    </div>
+
+                    <form action="/admin" method="GET" 
+                          style="background:#252525; padding:10px; border-radius:5px; border:1px solid #444; display:flex; gap:10px; align-items:flex-end;">
+                        
+                        <div style="display:flex; flex-direction:column;">
+                            <label style="font-size:0.8em; margin-bottom:2px;">Od:</label>
+                            <input type="date" name="from" value="<%= query.from %>" style="margin:0; padding:5px; width:130px;">
+                        </div>
+
+                        <div style="display:flex; flex-direction:column;">
+                            <label style="font-size:0.8em; margin-bottom:2px;">Do:</label>
+                            <input type="date" name="to" value="<%= query.to %>" style="margin:0; padding:5px; width:130px;">
+                        </div>
+
+                        <button type="submit" class="btn" style="padding: 6px 15px; font-size:0.9em; background-color: #1976D2;">
+                            🔍 Filtruj
+                        </button>
+
+                    </form>
+                </div>
+
+                <div style="background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 20px;">
+                    <h4 style="margin-top:0;">Trend Sprzedaży (Przychód Dzienny)</h4>
+                    <div style="height: 300px;">
+                        <canvas id="dailyRevenueChart"></canvas>
+                    </div>
+                </div>
+
+                <table>
+                    <tr><th>Spektakl</th><th>Bilety</th><th>Przychód (w wybranym okresie)</th></tr>
+                    <% if (report.length === 0) { %>
+                        <tr><td colspan="3" style="text-align:center; padding:20px; color:#777;">Brak sprzedaży w wybranym okresie.</td></tr>
+                    <% } %>
+                    <% report.forEach(row => { %>
+                        <tr>
+                            <td><%= row.title %></td>
+                            <td><%= row.tickets_sold %></td>
+                            <td style="color:#4CAF50; font-weight:bold"><%= row.revenue %> PLN</td>
+                        </tr>
+                    <% }) %>
+                </table>
+            </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // 1. Pobieramy dane z serwera (chartData zamiast report)
+    const chartData = <%- JSON.stringify(chartData) %>;
+
+    // 2. Mapujemy dane na osie X i Y
+    const labels = chartData.map(item => item.day);       // Oś X: Daty (YYYY-MM-DD)
+    const dataRevenue = chartData.map(item => parseFloat(item.revenue)); // Oś Y: Kwoty
+
+    // 3. Rysujemy wykres liniowy (lepiej pokazuje trendy w czasie)
+    const ctx = document.getElementById('dailyRevenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line', // Zmieniono na liniowy dla danych czasowych
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Przychód Dzienny (PLN)',
+                data: dataRevenue,
+                backgroundColor: 'rgba(33, 150, 243, 0.2)', // Niebieski wypełnienie
+                borderColor: 'rgba(33, 150, 243, 1)',      // Niebieska linia
+                borderWidth: 2,
+                fill: true, // Wypełnienie pod wykresem
+                tension: 0.3 // Lekkie zaokrąglenie linii
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#ccc' } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y + ' PLN';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#aaa' },
+                    grid: { color: '#333' }
+                },
+                x: {
+                    ticks: { color: '#aaa' },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+
+            <div id="spectacles" class="tab-content">
+                <div style="margin-bottom: 15px;">
+                    <h3>Repertuar</h3>
+                </div>
+                
+                <table>
+                    <tr>
+                        <th>Tytuł</th>
+                        <th>Gatunek</th>
+                        <th>Akcje</th>
+                    </tr>
+                    <% spectacles.forEach(spec => { %>
+                        <tr>
+                            <td><%= spec.title %></td>
+                            <td><span class="tag"><%= spec.genre_name || '-' %></span></td>
+                            <td>
+                                <a href="/admin/spectacle/edit/<%= spec.id %>" class="btn" style="padding: 5px 10px; font-size: 0.8em;">Edytuj</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </table>
+            </div>
+
+            <div id="seances" class="tab-content">
+                <div style="margin-bottom: 15px;">
+                    <h3>Harmonogram Seansów</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Spektakl</th>
+                            <th>Sala</th>
+                            <th>Cena</th> <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% seances.forEach(s => { %>
+                            <tr>
+                                <td><%= moment(s.start_time).format('YYYY-MM-DD HH:mm') %></td>
+                                <td><%= s.title %></td>
+                                <td><%= s.hall %></td>
+                                <td style="font-weight:bold; color:#4caf50;">
+                                    <%= parseFloat(s.base_price).toFixed(2) %> PLN
+                                </td> <td>
+                                    <a href="/admin/seance/edit/<%= s.id %>" class="btn" style="padding: 5px 10px; font-size: 0.8em; ">Edytuj</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            // 1. Ukryj wszystkie treści
+            const contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+
+            // 2. Usuń klasę 'active' ze wszystkich przycisków
+            const buttons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+
+            // 3. Pokaż wybraną treść i aktywuj kliknięty przycisk
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

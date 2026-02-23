@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zarządzanie Aktorami</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Zespół Aktorski i Płace</h1>
+            <a href="/admin" class="btn" style="background:#555">&larr; Wróć do Panelu</a>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h1>Zespół Aktorski</h1>
+    <a href="/admin/actors/new" class="btn" style="background:#4CAF50;">➕ Dodaj Aktora</a>
+</div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Imię i Nazwisko</th>
+                        <th>Liczba Ról</th>
+                        <th>Zarobki (Miesięczne)</th>
+                        <th>Akcja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% actors.forEach(actor => { %>
+                        <tr>
+                            <td><%= actor.id %></td>
+                            <td><%= actor.first_name %> <%= actor.last_name %></td>
+                            <td><%= actor.roles_count %></td>
+                            <td style="color:#4CAF50; font-weight:bold">
+                                <%= parseFloat(actor.base_salary).toFixed(2) %> PLN
+                            </td>
+                            <td>
+                                <a href="/admin/actors/edit/<%= actor.id %>" class="btn" style="padding: 5px 10px; font-size: 0.8em;">Edytuj</a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edytuj Seans</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <h1>Edytuj Seans (ID: <%= seance.id %>)</h1>
+        
+        <div class="card">
+            <form action="/admin/seance/edit/<%= seance.id %>" method="POST">
+                
+                <label>Spektakl:</label>
+                <select name="spectacle_id">
+                    <% spectacles.forEach(s => { %>
+                        <option value="<%= s.id %>" <%= seance.spectacle_id === s.id ? 'selected' : '' %>>
+                            <%= s.title %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <label>Sala:</label>
+                <select name="hall_id">
+                    <% halls.forEach(h => { %>
+                        <option value="<%= h.id %>" <%= seance.hall_id === h.id ? 'selected' : '' %>>
+                            <%= h.name %>
+                        </option>
+                    <% }) %>
+                </select>
+
+                <label>Data i Czas:</label>
+                <input type="datetime-local" name="start_time" value="<%= seance.formatted_time %>" required>
+
+                <label>Cena bazowa (PLN):</label>
+                <input type="number" name="price" step="0.01" value="<%= seance.base_price %>" required>
+
+                <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <a href="/admin" class="btn" style="background:#555">Anuluj</a>
+                    <button type="submit">Zaktualizuj Seans</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

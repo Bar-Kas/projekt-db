@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Analityka SQL - Teatr</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h1>Analityka SQL</h1>
+            <a href="/admin" class="btn" style="background:#555">← Wróć do Panelu</a>
+        </div>
+
+        <div class="card">
+            <h2>1. Gatunki z wysokim przychodem</h2>
+            
+            <div style="background:#2c2c2c; padding:10px; border-radius:4px; border:1px solid #444; color:#aaa; font-family:monospace; margin-bottom:15px; font-size:0.9em;">
+                <strong style="color:#4caf50">SQL:</strong> GROUP BY + KLAUZULA HAVING (Średnia cena > 30 PLN)
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nazwa Gatunku</th>
+                        <th>Średnia Cena Biletu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(stats.richGenres.rows.length === 0) { %>
+                        <tr><td colspan="2" style="text-align:center; color:#777;">Brak danych spełniających kryteria.</td></tr>
+                    <% } %>
+                    <% stats.richGenres.rows.forEach(row => { %>
+                        <tr>
+                            <td><strong style="color:#e0e0e0"><%= row.name %></strong></td>
+                            <td style="color:#4caf50; font-weight:bold"><%= parseFloat(row.avg_price).toFixed(2) %> PLN</td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>2. Aktorzy dramatyczni</h2>
+            
+            <div style="background:#2c2c2c; padding:10px; border-radius:4px; border:1px solid #444; color:#aaa; font-family:monospace; margin-bottom:15px; font-size:0.9em;">
+                <strong style="color:#4caf50">SQL:</strong> KLAUZULA EXISTS + PODZAPYTANIE SKORELOWANE
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imię</th>
+                        <th>Nazwisko</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% stats.dramaActors.rows.forEach(row => { %>
+                        <tr>
+                            <td><%= row.first_name %></td>
+                            <td><%= row.last_name %></td>
+                            <td><span class="tag">Gra w Dramacie</span></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>3. Bardzo długie spektakle</h2>
+
+            <div style="background:#2c2c2c; padding:10px; border-radius:4px; border:1px solid #444; color:#aaa; font-family:monospace; margin-bottom:15px; font-size:0.9em;">
+                <strong style="color:#4caf50">SQL:</strong> KLAUZULA ALL (Dłuższe niż wszystkie musicale)
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tytuł Spektaklu</th>
+                        <th>Czas trwania</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(stats.longSpectacles.rows.length === 0) { %>
+                        <tr><td colspan="2" style="text-align:center; color:#777;">Żaden spektakl nie spełnia warunku.</td></tr>
+                    <% } %>
+                    <% stats.longSpectacles.rows.forEach(row => { %>
+                        <tr>
+                            <td><%= row.title %></td>
+                            <td><%= row.duration_minutes %> min</td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>4. Najlepiej zarabiający pracownicy</h2>
+
+            <div style="background:#2c2c2c; padding:10px; border-radius:4px; border:1px solid #444; color:#aaa; font-family:monospace; margin-bottom:15px; font-size:0.9em;">
+                <strong style="color:#4caf50">SQL:</strong> PODZAPYTANIE NIESKORELOWANE (Pensja > Średnia)
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imię i Nazwisko</th>
+                        <th>Pensja</th>
+                        <th>Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% stats.highEarners.rows.forEach(row => { %>
+                        <tr>
+                            <td><%= row.first_name %> <%= row.last_name %></td>
+                            <td style="color:#4caf50; font-weight:bold"><%= row.salary %> PLN</td>
+                            <td style="color:#81c784; font-size:0.9em;">Powyżej średniej</td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
+</html>

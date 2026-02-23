@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edytuj Spektakl</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 900px;">
+        <h1>Edycja: <%= spectacle.title %></h1>
+        
+        <div class="card">
+            <h3>Dane Podstawowe</h3>
+            <form action="/admin/spectacle/edit/<%= spectacle.id %>" method="POST" enctype="multipart/form-data">
+                
+                <label>Tytuł:</label>
+                <input type="text" name="title" value="<%= spectacle.title %>" required>
+
+                <label>Gatunek:</label>
+                <select name="genre_id" required>
+                    <% genres.forEach(g => { %>
+                        <option value="<%= g.id %>" <%= spectacle.genre_id === g.id ? 'selected' : '' %>>
+                            <%= g.name %>
+                        </option>
+                    <% }) %>
+                </select>
+                
+                <label>Opis:</label>
+                <textarea name="description" required rows="5"><%= spectacle.description %></textarea>
+                
+                <div style="display:flex; gap:20px;">
+                    <div style="flex:1">
+                        <label>Czas trwania (min):</label>
+                        <input type="number" name="duration" value="<%= spectacle.duration_minutes %>" required>
+                    </div>
+                    <div style="flex:1">
+                         <label>Plakat:</label>
+                         <input type="file" name="poster" accept="image/*">
+                    </div>
+                </div>
+
+                <div style="text-align:right; margin-top:10px;">
+                    <button type="submit">💾 Zapisz Zmiany Danych</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card" style="border-top: 4px solid #9c27b0;">
+            <h3>Obsada (Aktorzy)</h3>
+            
+            <% if (currentCast.length > 0) { %>
+                <table style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Aktor</th>
+                            <th>Rola</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% currentCast.forEach(c => { %>
+                            <tr>
+                                <td><%= c.first_name %> <%= c.last_name %></td>
+                                <td><em><%= c.role_name %></em></td>
+                                <td>
+<form action="/admin/spectacle/<%= spectacle.id %>/remove-actor" method="POST" style="margin:0;">
+    <input type="hidden" name="actor_id" value="<%= c.actor_id %>">
+    <button type="submit" style="background:#c62828;">Usuń</button>
+</form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p style="color:#aaa; font-style:italic;">Brak przypisanych aktorów.</p>
+            <% } %>
+
+            <div style="background:#252525; padding:15px; border-radius:5px; border:1px solid #444;">
+                <h4>Dodaj Aktora do Obsady</h4>
+                <form action="/admin/spectacle/<%= spectacle.id %>/add-actor" method="POST" style="display:flex; gap:10px; align-items:flex-end;">
+                    
+                    <div style="flex:1;">
+                        <label style="font-size:0.8em;">Wybierz Aktora:</label>
+                        <select name="actor_id" required style="margin:0;">
+                            <option value="" disabled selected>-- Wybierz --</option>
+                            <% availableActors.forEach(a => { %>
+                                <option value="<%= a.id %>"><%= a.first_name %> <%= a.last_name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div style="flex:1;">
+                        <label style="font-size:0.8em;">Nazwa Roli:</label>
+                        <input type="text" name="role_name" placeholder="np. Romeo" required style="margin:0;">
+                    </div>
+
+                    <button type="submit" style="background:#4CAF50;">➕ Dodaj</button>
+                </form>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <a href="/admin" class="btn" style="background:#555">&larr; Wróć do Panelu</a>
+        </div>
+    </div>
+</body>
+</html>

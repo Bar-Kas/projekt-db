@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title><%= spectacle.title %> - Szczegóły</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <div style="margin-bottom: 20px;">
+            <a href="/" class="btn" style="background:#555">← Wróć do repertuaru</a>
+        </div>
+
+        <div class="card" style="display: flex; gap: 30px; flex-wrap: wrap;">
+            
+            <div style="flex: 0 0 300px; max-width: 100%;">
+                <img src="<%= spectacle.poster_url %>" 
+                     alt="Plakat <%= spectacle.title %>" 
+                     class="poster-img" 
+                     style="height: auto; min-height: 400px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"
+                     onerror="this.onerror=null;this.src='/images/default-poster.png';">
+            </div>
+
+            <div style="flex: 1; min-width: 300px;">
+                <h1 style="margin-top: 0; font-size: 2.5rem; color: #4caf50;"><%= spectacle.title %></h1>
+                
+                <p>
+                    <span class="tag" style="font-size: 1rem; padding: 5px 10px;">
+                        <%= spectacle.genre_name || 'Gatunek nieznany' %>
+                    </span>
+                    <span style="color: #aaa; margin-left: 15px;">
+                        ⏱ Czas trwania: <%= spectacle.duration_minutes %> min
+                    </span>
+                </p>
+
+                <div style="background: #252525; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4caf50; color: #ddd;">
+                    <%= spectacle.description %>
+                </div>
+
+                <h3>Obsada:</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <% if (actors.length === 0) { %>
+                        <li style="color: #777;">Brak informacji o obsadzie.</li>
+                    <% } %>
+                    <% actors.forEach(actor => { %>
+                        <li style="margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 8px;">
+                            <strong style="color: #e0e0e0;"><%= actor.first_name %> <%= actor.last_name %></strong>
+                            <span style="color: #aaa;"> jako </span>
+                            <span style="color: #81c784;"><%= actor.role_name %></span>
+                        </li>
+                    <% }) %>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📅 Nadchodzące Seanse</h2>
+            <% if (seances.length === 0) { %>
+                <p style="color: #aaa;">Brak zaplanowanych seansów.</p>
+            <% } else { %>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Data i Godzina</th>
+                            <th>Sala</th>
+                            <th>Cena</th>
+                            <th>Akcja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% seances.forEach(seance => { %>
+                            <tr>
+                                <td><%= moment(seance.start_time).format('YYYY-MM-DD HH:mm') %></td>
+                                <td><%= seance.hall_name %></td>
+                                <td style="font-weight: bold; color: #4caf50;"><%= seance.base_price %> PLN</td>
+                                <td>
+                                    <a href="/book/<%= seance.id %>" class="btn" style="padding: 5px 15px; font-size: 0.9em;">
+                                        🎟 Rezerwuj
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } %>
+        </div>
+
+        <div class="card">
+            <h2>⭐ Recenzje Widzów</h2>
+            
+            <form action="/spectacle/<%= spectacle.id %>/review" method="POST" style="margin-bottom: 30px; background: #252525; padding: 15px; border-radius: 5px;">
+                <h4 style="margin-top: 0;">Dodaj swoją opinię:</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    
+                    <select name="rating" style="width: 180px; margin: 0;">
+                        <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                        <option value="4">⭐⭐⭐⭐ (4)</option>
+                        <option value="3">⭐⭐⭐ (3)</option>
+                        <option value="2">⭐⭐ (2)</option>
+                        <option value="1">⭐ (1)</option>
+                    </select>
+
+                    <input type="text" name="comment" placeholder="Napisz krótki komentarz..." required style="margin: 0;">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Wyślij opinię</button>
+            </form>
+
+            <% if (reviews.length === 0) { %>
+                <p style="color: #777;">Brak recenzji. Bądź pierwszy!</p>
+            <% } %>
+            <% reviews.forEach(r => { %>
+                <div style="border-bottom: 1px solid #333; padding: 10px 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong style="color: #4caf50;"><%= r.username || 'Anonim' %></strong>
+                        <span style="color: gold;"><%= '⭐'.repeat(r.rating) %></span>
+                    </div>
+                    <p style="margin: 5px 0; color: #ccc;"><%= r.comment %></p>
+                    <small style="color: #666;"><%= moment(r.created_at).format('YYYY-MM-DD HH:mm') %></small>
+                </div>
+            <% }) %>
+        </div>
+
+    </div>
+</body>
+</html>

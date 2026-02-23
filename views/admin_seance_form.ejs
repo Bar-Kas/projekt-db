@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dodaj Seans</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <h1>Utwórz Nowy Seans</h1>
+        
+        <div class="card">
+            <form action="/admin/seance" method="POST">
+                
+                <label>Spektakl:</label>
+                <select name="spectacle_id" required>
+                    <% spectacles.forEach(s => { %> 
+                        <option value="<%= s.id %>"><%= s.title %></option> 
+                    <% }) %>
+                </select>
+                
+                <label>Sala:</label>
+                <select name="hall_id" required>
+                    <% halls.forEach(h => { %> 
+                        <option value="<%= h.id %>"><%= h.name %></option> 
+                    <% }) %>
+                </select>
+                
+                <label>Data i Czas:</label>
+                <input type="datetime-local" name="start_time" required>
+                
+                <label>Cena Bazowa (PLN):</label>
+                <input type="number" name="price" step="0.01" placeholder="np. 50.00" required>
+                
+                <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <a href="/admin" class="btn" style="background:#555">Anuluj</a>
+                    <button type="submit">Utwórz Seans</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
